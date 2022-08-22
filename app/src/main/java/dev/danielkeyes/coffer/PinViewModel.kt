@@ -16,11 +16,15 @@ class PinViewModel: ViewModel() {
         debug()
     }
 
-    fun submit(): Boolean{
+    fun submit(onSuccess: () -> Unit, onFailure: () -> Unit){
         // gets pin from secure storage
         // compares to current pin
         // returns if equal
-        return _pin.value == "1111"
+        if(_pin.value == "1111") {
+            onSuccess()
+        } else {
+            onFailure()
+        }
     }
 
     fun entry(char: Char){
@@ -31,5 +35,4 @@ class PinViewModel: ViewModel() {
     private fun debug(){
         Log.e("dkeyes", "pin: ${pin.value}")
     }
-
 }

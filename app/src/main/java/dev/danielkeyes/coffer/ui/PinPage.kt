@@ -1,4 +1,4 @@
-package dev.danielkeyes.coffer
+package dev.danielkeyes.coffer.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,13 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun PinPage(pin: String?,
+            navController: NavHostController,
             onEntry: (Char) -> Unit,
             delete: () -> Unit,
             submit: () -> Unit,
@@ -39,12 +41,16 @@ fun PinPage(pin: String?,
                 text = "*".repeat(pin.toString().length),
                 textAlign = TextAlign.Center,
                 fontSize = 32.sp,
-                modifier = Modifier.fillMaxWidth().padding(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
                         top = 48.dp, bottom = 2.dp,
                     )
             )
             Spacer(
-                modifier = Modifier.fillMaxWidth().height(1.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
                     .background(MaterialTheme.colors.onBackground)
             )
         }
@@ -131,7 +137,7 @@ Modifier =
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    PinPage(pin = "1234",{},{},{},)
+    PinPage(pin = "1234", rememberNavController(), {}, {}, {})
 }
 
 @Preview(showBackground = true)
