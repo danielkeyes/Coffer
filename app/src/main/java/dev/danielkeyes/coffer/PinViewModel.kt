@@ -4,8 +4,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class PinViewModel: ViewModel() {
+@HiltViewModel
+class PinViewModel @Inject constructor(
+    private val pinRepository: IPinRepository
+): ViewModel() {
 
     private val _pin = MutableLiveData<String>("")
     val pin: LiveData<String>
@@ -20,7 +25,7 @@ class PinViewModel: ViewModel() {
         // gets pin from secure storage
         // compares to current pin
         // returns if equal
-        if(_pin.value == "1111") {
+        if(_pin.value?.toInt() == pinRepository.retrievePin()) {
             onSuccess()
         } else {
             onFailure()

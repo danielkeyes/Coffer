@@ -4,7 +4,9 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -23,7 +25,10 @@ fun MyNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = ROUTE.PINPAGE.toString()) {
 
         composable(ROUTE.PINPAGE.toString()) {
-            val pinViewModel = viewModel<PinViewModel>()
+            val parentEntry = remember { navController.getBackStackEntry(ROUTE.PINPAGE.toString()) }
+            val pinViewModel = hiltViewModel<PinViewModel>(parentEntry)
+
+//            val pinViewModel: PinViewModel = viewModel()
             val pin by pinViewModel.pin.observeAsState()
 
             val context = LocalContext.current
