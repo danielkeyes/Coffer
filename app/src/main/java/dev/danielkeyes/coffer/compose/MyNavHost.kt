@@ -7,15 +7,19 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import dev.danielkeyes.coffer.ui.PinPage
 import dev.danielkeyes.coffer.PinViewModel
+import dev.danielkeyes.coffer.SplashScreenViewModel
 import dev.danielkeyes.coffer.ui.Content
+import dev.danielkeyes.coffer.ui.Setup
+import dev.danielkeyes.coffer.ui.SplashScreen
 
 enum class ROUTE {
+    SPLASH,
+    SETUP,
     PINPAGE,
     CONTENT,
 }
@@ -23,6 +27,20 @@ enum class ROUTE {
 @Composable
 fun MyNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = ROUTE.PINPAGE.toString()) {
+
+        composable(ROUTE.SPLASH.toString()){
+            val parentEntry = remember { navController.getBackStackEntry(ROUTE.SPLASH.toString()) }
+            val splashScreenViewModel = hiltViewModel<SplashScreenViewModel>(parentEntry)
+
+            SplashScreen(
+                navController = navController,
+                splashScreenViewModel.navigate(navController)
+                )
+        }
+
+        composable(ROUTE.SETUP.toString()) {
+            Setup(navController = navController)
+        }
 
         composable(ROUTE.PINPAGE.toString()) {
             val parentEntry = remember { navController.getBackStackEntry(ROUTE.PINPAGE.toString()) }
