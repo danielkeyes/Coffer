@@ -1,22 +1,28 @@
 package dev.danielkeyes.coffer.usecase
 
+import android.util.Base64
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import java.security.spec.InvalidKeySpecException
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
+import javax.inject.Inject
 
 // used https://gist.github.com/tuesd4y/e1584120484ac24be9f00f3968a4787d
 interface IPasswordUseCase {
-    fun isPinValid(pin: String?): Boolean
+    fun isHashValid(hash: String?): Boolean
     fun generateSalt(): ByteArray
     fun isExpectedPassword(password: String, salt: ByteArray, expectedHash: ByteArray): Boolean
     fun hash(password: String, salt: ByteArray): ByteArray
 }
 
-class PasswordUseCase: IPasswordUseCase {
-    override fun isPinValid(pin: String?): Boolean {
-        return pin != null && pin.isNotEmpty()
+class PasswordUseCase @Inject constructor(): IPasswordUseCase {
+    override fun isHashValid(hash: String?): Boolean {
+        return hash != null && hash.isNotEmpty()
     }
 
     override fun generateSalt(): ByteArray {
@@ -45,4 +51,21 @@ class PasswordUseCase: IPasswordUseCase {
             spec.clearPassword()
         }
     }
+
+    private fun convertToByteArray(string: String): ByteArray {
+        return string.toByteArray(charset = charset("UTF-8"))
+    }
+
+    private fun convertToString(byteArray: ByteArray): String {
+        return Base64.encodeToString(byteArray, Base64.DEFAULT).filter { !it.isWhitespace() }
+    }
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class UseCaseModule {
+    @Binds
+    abstract fun bindPasswordUseCase(
+        passwordUseCase: PasswordUseCase
+    ): IPasswordUseCase
 }

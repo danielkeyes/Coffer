@@ -12,14 +12,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PinViewModel @Inject constructor(
-    private val pinRepository: IPinRepository
+    private val pinRepository: IPasswordRepository
 ): ViewModel() {
 
     private val _pin = MutableLiveData<String>("")
     val pin: LiveData<String>
         get() = _pin
 
-    val storedPin = pinRepository.pin.asLiveData()
+//    val storedPin = pinRepository.pin.asLiveData()
 
     fun delete(){
         _pin.value = _pin.value?.dropLast(1)
@@ -28,7 +28,7 @@ class PinViewModel @Inject constructor(
 
     fun updatePin(pin: String) {
         viewModelScope.launch {
-            pinRepository.updatePin(pin)
+//            pinRepository.updatePin(pin)
         }
     }
 
@@ -36,7 +36,8 @@ class PinViewModel @Inject constructor(
         // gets pin from secure storage
         // compares to current pin
         // returns if equal
-        if(storedPin.value != null && storedPin.value == pin.value) {
+//        if(storedPin.value != null && storedPin.value == pin.value) {
+        if(false) {
             onSuccess()
         } else {
             onFailure()

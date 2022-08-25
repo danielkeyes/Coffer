@@ -36,27 +36,32 @@ fun PinPage(pin: String?,
 ) {
     Column() {
         Box(modifier = Modifier.weight(1f))
-        Column(modifier = Modifier.padding(72.dp)) {
-            Text(
-                text = "*".repeat(pin.toString().length),
-                textAlign = TextAlign.Center,
-                fontSize = 32.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = 48.dp, bottom = 2.dp,
-                    )
-            )
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(MaterialTheme.colors.onBackground)
-            )
-        }
+        PinDisplay(pin = pin)
         Box(modifier = Modifier.weight(1f))
         Keypad(onEntry = {char ->  onEntry(char)}, delete = delete, submit = submit)
         Box(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun PinDisplay(pin: String?) {
+    Column(modifier = Modifier.padding(72.dp)) {
+        Text(
+            text = "*".repeat(pin.toString().length),
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = 48.dp, bottom = 2.dp,
+                )
+        )
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(MaterialTheme.colors.onBackground)
+        )
     }
 }
 

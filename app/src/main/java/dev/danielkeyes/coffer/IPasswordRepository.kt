@@ -15,6 +15,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
@@ -27,13 +28,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 // start Pin Preferences Datastore
-private const val PIN_PREFERENCES_NAME = "pin_preferences"
+private const val PASSWORD_PREFERENCES_NAME = "password_preferences"
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-    name = PIN_PREFERENCES_NAME
+    name = PASSWORD_PREFERENCES_NAME
 )
-
-data class PinPreferences(val pin: String)
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -48,45 +47,79 @@ abstract class PinPreferencesModule {
             return PreferenceDataStoreFactory.create(
                 corruptionHandler = ReplaceFileCorruptionHandler(
                 produceNewData = { emptyPreferences() }),
-                migrations = listOf(SharedPreferencesMigration(appContext, PIN_PREFERENCES_NAME)),
+                migrations = listOf(SharedPreferencesMigration(appContext, PASSWORD_PREFERENCES_NAME)),
                 scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-                produceFile = { appContext.preferencesDataStoreFile(PIN_PREFERENCES_NAME) }
+                produceFile = { appContext.preferencesDataStoreFile(PASSWORD_PREFERENCES_NAME) }
             )
         }
     }
 }
 // end
 
-interface IPinRepository {
-    val pin: Flow<String?>
+interface IPasswordRepository {
+    val salt: Flow<String?>
+    val hash: Flow<String?>
 
-    suspend fun updatePin(pin: String)
+    suspend fun storeHashedPassword(hash: String)
+
+    /**
+     * Unimplemented
+     */
+    suspend fun retrieveHashedPassword(): String?
+
+    suspend fun storePasswordSalt(salt: String)
+
+    /**
+     * Unimplemented
+     */
+    suspend fun retrievePasswordSalt(): String?
 }
 
-class PinRepository @Inject constructor(
+@Singleton
+class PasswordRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
-): IPinRepository {
+): IPasswordRepository {
 
-    override val pin = dataStore.data.map { preferences ->
-        preferences[PIN_PREFERENCE_KEY] ?: null
+    override val hash = dataStore.data.map { preferences ->
+        preferences[HASHED_PASSWORD_PREFERENCE_KEY] ?: null
     }
 
-    override suspend fun updatePin(pin: String) {
+    override val salt = dataStore.data.map { preferences ->
+        preferences[SALT_PREFERENCE_KEY] ?: null
+    }
+    override suspend fun storeHashedPassword(hash: String) {
         dataStore.edit { preferences ->
-            preferences[PIN_PREFERENCE_KEY] = pin
+            preferences[HASHED_PASSWORD_PREFERENCE_KEY] = hash
         }
     }
 
+    override suspend fun retrieveHashedPassword(): String {
+        TODO("Not yet implemented")
+        return ""
+    }
+
+    override suspend fun storePasswordSalt(salt: String) {
+        dataStore.edit { preferences ->
+            preferences[SALT_PREFERENCE_KEY] = salt
+        }
+    }
+
+    override suspend fun retrievePasswordSalt(): String {
+        TODO("Not yet implemented")
+        return ""
+    }
+
     companion object{
-        val PIN_PREFERENCE_KEY = stringPreferencesKey("pin_preference")
+        val SALT_PREFERENCE_KEY = stringPreferencesKey("salt_preference")
+        val HASHED_PASSWORD_PREFERENCE_KEY = stringPreferencesKey("hased_password_preference")
     }
 }
 
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class AnalyticsModule {
+abstract class PasswordRepositoryModule {
     @Binds
-    abstract fun bindPinRepository(
-        pinRepository: PinRepository
-    ): IPinRepository
+    abstract fun bindPasswordRepository(
+        passwordRepository: PasswordRepository
+    ): IPasswordRepository
 }

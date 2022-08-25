@@ -1,5 +1,6 @@
 package dev.danielkeyes.coffer.compose
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,20 +27,27 @@ enum class ROUTE {
 
 @Composable
 fun MyNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = ROUTE.PINPAGE.toString()) {
+    NavHost(navController = navController, startDestination = ROUTE.SPLASH.toString()) {
 
         composable(ROUTE.SPLASH.toString()){
             val parentEntry = remember { navController.getBackStackEntry(ROUTE.SPLASH.toString()) }
             val splashScreenViewModel = hiltViewModel<SplashScreenViewModel>(parentEntry)
 
+            Log.e("dkeyes", "splash route")
+
             SplashScreen(
                 navController = navController,
-                splashScreenViewModel.navigate(navController)
+                navigate = {
+                    splashScreenViewModel.navigate(navController)
+                           },
                 )
         }
 
         composable(ROUTE.SETUP.toString()) {
+            Log.e("dkeyes", "setup")
             Setup(navController = navController)
+            Log.e("dkeyes", "setup2")
+
         }
 
         composable(ROUTE.PINPAGE.toString()) {
