@@ -7,13 +7,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.danielkeyes.coffer.usecase.IPasswordUseCase
+import dev.danielkeyes.coffer.usecase.PasswordUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PinViewModel @Inject constructor(
-    private val pinRepository: IPasswordRepository
+    private val passwordRepository: IPasswordRepository,
+    private val passwordUseCase: IPasswordUseCase
 ): ViewModel() {
+
+    val salt = passwordRepository.hash.asLiveData()
+    val hash = passwordRepository.salt.asLiveData()
 
     private val _pin = MutableLiveData<String>("")
     val pin: LiveData<String>
@@ -33,14 +39,24 @@ class PinViewModel @Inject constructor(
     }
 
     fun submit(onSuccess: () -> Unit, onFailure: () -> Unit){
-        // gets pin from secure storage
-        // compares to current pin
-        // returns if equal
-//        if(storedPin.value != null && storedPin.value == pin.value) {
-        if(false) {
-            onSuccess()
-        } else {
-            onFailure()
+        Log.e("dkeyes", "submit called")
+        viewModelScope.launch() {
+            val hash = hash.value ?: ""
+            val salt = salt.value ?: ""
+
+            Log.e("dkeyes", "hash $hash")
+            Log.e("dkeyes", "salt $salt")
+            Log.e("dkeyes", "pin ${pin.value}")
+            Log.e("dkeyes", "password hash ${passwordUseCase.hash(_pin.value!!, salt)}")
+
+            if(
+                _pin.value != null &&
+                passwordUseCase.hash(_pin.value!!, salt) == hash
+            ){
+                onSuccess()
+            } else {
+                onFailure()
+            }
         }
     }
 

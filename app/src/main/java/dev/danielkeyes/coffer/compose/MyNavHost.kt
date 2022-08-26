@@ -1,7 +1,8 @@
 package dev.danielkeyes.coffer.compose
 
-import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -13,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import dev.danielkeyes.coffer.ui.PinPage
 import dev.danielkeyes.coffer.PinViewModel
+import dev.danielkeyes.coffer.SetupViewModel
 import dev.danielkeyes.coffer.SplashScreenViewModel
 import dev.danielkeyes.coffer.ui.Content
 import dev.danielkeyes.coffer.ui.Setup
@@ -27,35 +29,50 @@ enum class ROUTE {
 
 @Composable
 fun MyNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = ROUTE.SPLASH.toString()) {
+    NavHost(
+        navController = navController, startDestination = ROUTE.SPLASH.toString()
+    ) {
 
-        composable(ROUTE.SPLASH.toString()){
+        composable(ROUTE.SPLASH.toString()) {
             val parentEntry = remember { navController.getBackStackEntry(ROUTE.SPLASH.toString()) }
             val splashScreenViewModel = hiltViewModel<SplashScreenViewModel>(parentEntry)
 
-            Log.e("dkeyes", "splash route")
-
-            SplashScreen(
-                navController = navController,
-                navigate = {
-                    splashScreenViewModel.navigate(navController)
-                           },
+            SplashScreen(navController = navController, checkSetup = {
+                splashScreenViewModel.checkSetup(
+                    isSetup = {
+                        navController.apply {
+                            popBackStack()
+                            navController.navigate(ROUTE.PINPAGE.toString())
+                        }
+                    },
+                    isNotSetup = {
+                        navController.apply {
+                            popBackStack()
+                            navigate(ROUTE.SETUP.toString())
+                        }
+                    }
                 )
+            })
         }
 
         composable(ROUTE.SETUP.toString()) {
-            Log.e("dkeyes", "setup")
-            Setup(navController = navController)
-            Log.e("dkeyes", "setup2")
-
+            val parentEntry = remember { navController.getBackStackEntry(ROUTE.SETUP.toString()) }
+            val setupViewModel = hiltViewModel<SetupViewModel>(parentEntry )
+            Setup(
+                navController = navController,
+                successfulSetup = { pin ->
+                    setupViewModel.setPin(pin)
+                }
+            )
         }
 
         composable(ROUTE.PINPAGE.toString()) {
             val parentEntry = remember { navController.getBackStackEntry(ROUTE.PINPAGE.toString()) }
             val pinViewModel = hiltViewModel<PinViewModel>(parentEntry)
 
-//            val pinViewModel: PinViewModel = viewModel()
             val pin by pinViewModel.pin.observeAsState()
+            val hash by pinViewModel.hash.observeAsState()
+            val salt by pinViewModel.salt.observeAsState()
 
             val context = LocalContext.current
 
@@ -72,6 +89,12 @@ fun MyNavHost(navController: NavHostController) {
                         Toast.makeText(context, "Incorrect Pin", Toast.LENGTH_LONG).show()
                     }
                 )},
+                debugContent = {
+                    Column() {
+                        Text(text = "hash: $hash")
+                        Text(text = "salt: $salt")
+                    }
+                }
             )
         }
 

@@ -18,10 +18,11 @@ class SplashScreenViewModel @Inject constructor(
     private val passwordUseCase: IPasswordUseCase,
 ): ViewModel() {
 
-    /**
-     * Navigates to either setup page or pin page
-     */
-    fun navigate(navController: NavHostController){
+
+    fun checkSetup(
+        isSetup: () -> Unit,
+        isNotSetup: () -> Unit,
+    ){
         Log.e("dkeyes", "here")
         viewModelScope.launch {
             delay(2000)
@@ -29,18 +30,14 @@ class SplashScreenViewModel @Inject constructor(
 
             Log.e("dkeyes", "hash: $hash")
 
-            if (!passwordUseCase.isHashValid(hash)) {
+            if (passwordUseCase.isHashValid(hash)) {
                 Log.e("dkeyes", "here2")
-                navController.apply {
-                    popBackStack()
-                    navigate(ROUTE.SETUP.toString())
-                }
+                isSetup()
                 Log.e("dkeyes", "here2-1")
 
             } else {
                 Log.e("dkeyes", "here3")
-
-                navController.navigate(ROUTE.PINPAGE.toString())
+                isNotSetup()
                 Log.e("dkeyes", "here3-1")
 
             }

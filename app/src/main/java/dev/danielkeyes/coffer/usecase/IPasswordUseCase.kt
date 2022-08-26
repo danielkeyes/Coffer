@@ -13,11 +13,13 @@ import javax.crypto.spec.PBEKeySpec
 import javax.inject.Inject
 
 // used https://gist.github.com/tuesd4y/e1584120484ac24be9f00f3968a4787d
+// this example but with conversion to Strings for easier usability and later storage to
+// preferences store
 interface IPasswordUseCase {
     fun isHashValid(hash: String?): Boolean
-    fun generateSalt(): ByteArray
-    fun isExpectedPassword(password: String, salt: ByteArray, expectedHash: ByteArray): Boolean
-    fun hash(password: String, salt: ByteArray): ByteArray
+    fun generateSalt(): String
+    fun isExpectedPassword(password: String, salt: String, expectedHash: ByteArray): Boolean
+    fun hash(password: String, salt: String): String
 }
 
 class PasswordUseCase @Inject constructor(): IPasswordUseCase {
@@ -25,24 +27,25 @@ class PasswordUseCase @Inject constructor(): IPasswordUseCase {
         return hash != null && hash.isNotEmpty()
     }
 
-    override fun generateSalt(): ByteArray {
+    override fun generateSalt(): String {
         val salt = ByteArray(16)
         SecureRandom().nextBytes(salt)
-        return salt
+        return convertToString(salt)
     }
 
-    override fun isExpectedPassword(password: String, salt: ByteArray, expectedHash: ByteArray):
+    override fun isExpectedPassword(password: String, salt: String, expectedHash: ByteArray):
             Boolean {
-        val pwdHash = hash(password, salt)
+        val pwdHash = convertToByteArray(hash(password, salt))
         if (pwdHash.size != expectedHash.size) return false
         return pwdHash.indices.all { pwdHash[it] == expectedHash[it] }
     }
 
-    override fun hash(password: String, salt: ByteArray): ByteArray {
-        val spec = PBEKeySpec(password.toCharArray(), salt, 1000, 256)
+    override fun hash(password: String, salt: String): String {
+        val saltByteArray = convertToByteArray(salt)
+        val spec = PBEKeySpec(password.toCharArray(), saltByteArray, 1000, 256)
         try {
             val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-            return skf.generateSecret(spec).encoded
+            return convertToString(skf.generateSecret(spec).encoded)
         } catch (e: NoSuchAlgorithmException) {
             throw AssertionError("Error while hashing a password: " + e.message, e)
         } catch (e: InvalidKeySpecException) {
@@ -52,12 +55,13 @@ class PasswordUseCase @Inject constructor(): IPasswordUseCase {
         }
     }
 
-    private fun convertToByteArray(string: String): ByteArray {
+    fun convertToByteArray(string: String): ByteArray {
+
         return string.toByteArray(charset = charset("UTF-8"))
     }
 
-    private fun convertToString(byteArray: ByteArray): String {
-        return Base64.encodeToString(byteArray, Base64.DEFAULT).filter { !it.isWhitespace() }
+    fun convertToString(byteArray: ByteArray): String {
+        return String(byteArray, charset("UTF-8"))
     }
 }
 

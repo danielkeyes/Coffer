@@ -10,10 +10,10 @@ import androidx.navigation.NavHostController
 @Composable
 fun SplashScreen(
     navController: NavHostController,
-    navigate: () -> Unit,
+    checkSetup: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(text = "Splash Icon Here")
-        navigate()
+        checkSetup()
     }
 }
