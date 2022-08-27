@@ -1,7 +1,6 @@
 package dev.danielkeyes.coffer
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.SharedPreferencesMigration
@@ -16,7 +15,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
@@ -24,14 +22,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// TODO - move this
 // start Pin Preferences Datastore
 private const val PASSWORD_PREFERENCES_NAME = "password_preferences"
 
@@ -67,11 +62,8 @@ interface IPasswordRepository {
 
     suspend fun storeHashedPassword(hash: String)
 
-//    suspend fun retrieveHashedPassword(): String?
-
     suspend fun storePasswordSalt(salt: String)
 
-//    suspend fun retrievePasswordSalt(): String?
 }
 
 @Singleton
@@ -93,34 +85,11 @@ class PasswordRepository @Inject constructor(
         }
     }
 
-//    override suspend fun retrieveHashedPassword(): String {
-//        return retrieveFlowValue(hash)
-//    }
-
     override suspend fun storePasswordSalt(salt: String) {
         dataStore.edit { preferences ->
             preferences[SALT_PREFERENCE_KEY] = salt
         }
     }
-
-//    override suspend fun retrievePasswordSalt(): String {
-//        return retrieveFlowValue(salt)
-//    }
-
-//    private suspend fun retrieveFlowValue( flow: Flow<String?>): String {
-//        Log.e("dkeyes", "aaaa")
-//        var returnValue = ""
-//        flow.collectLatest{ hash ->
-//            if( hash != null) {
-//                Log.e("dkeyes", "bbbb")
-//
-//                returnValue = hash
-//            }
-//        }
-//        Log.e("dkeyes", "cccc")
-//
-//        return returnValue
-//    }
 
     companion object{
         val SALT_PREFERENCE_KEY = stringPreferencesKey("salt_preference")

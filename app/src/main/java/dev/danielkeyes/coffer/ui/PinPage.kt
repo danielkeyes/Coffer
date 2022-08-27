@@ -30,16 +30,10 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun PinPage(pin: String?,
-            navController: NavHostController,
             onEntry: (Char) -> Unit,
             delete: () -> Unit,
             submit: () -> Unit,
-            debugContent: @Composable () -> Unit = {}
 ) {
-    Column() {
-        Text(text = "Debug:")
-        debugContent()
-    }
     Column() {
         Box(modifier = Modifier.weight(1f))
         PinDisplay(pin = pin)
@@ -148,7 +142,7 @@ Modifier =
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    PinPage(pin = "1234", rememberNavController(), {}, {}, {})
+    PinPage(pin = "1234", {}, {}, {})
 }
 
 @Preview(showBackground = true)

@@ -1,9 +1,7 @@
 package dev.danielkeyes.coffer.ui
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
@@ -60,7 +58,7 @@ fun Setup(
                 submit = {
                     if (pin2.value == pin1.value) {
                         successfulSetup(pin2.value)
-                        navController.navigate(ROUTE.PINPAGE.toString())
+                        navController.navigate(ROUTE.PIN_PAGE.toString())
                     } else {
                         Toast.makeText(
                             context, "Pins did not match", Toast.LENGTH_SHORT

@@ -1,6 +1,6 @@
 package dev.danielkeyes.coffer.usecase
 
-import android.util.Base64
+import android.util.Log
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,8 +18,8 @@ import javax.inject.Inject
 interface IPasswordUseCase {
     fun isHashValid(hash: String?): Boolean
     fun generateSalt(): String
-    fun isExpectedPassword(password: String, salt: String, expectedHash: ByteArray): Boolean
-    fun hash(password: String, salt: String): String
+    fun isExpectedPassword(password: String, salt: String, expectedHash: String): Boolean
+    fun  hash(password: String, salt: String): String
 }
 
 class PasswordUseCase @Inject constructor(): IPasswordUseCase {
@@ -30,14 +30,16 @@ class PasswordUseCase @Inject constructor(): IPasswordUseCase {
     override fun generateSalt(): String {
         val salt = ByteArray(16)
         SecureRandom().nextBytes(salt)
+
         return convertToString(salt)
     }
 
-    override fun isExpectedPassword(password: String, salt: String, expectedHash: ByteArray):
+    override fun isExpectedPassword(password: String, salt: String, expectedHash: String):
             Boolean {
-        val pwdHash = convertToByteArray(hash(password, salt))
-        if (pwdHash.size != expectedHash.size) return false
-        return pwdHash.indices.all { pwdHash[it] == expectedHash[it] }
+        val passwordHashByteArray = convertToByteArray(string = hash(password = password, salt = salt))
+        val expectedHashByteArray = convertToByteArray(string = expectedHash)
+        if (passwordHashByteArray.size != expectedHashByteArray.size) return false
+        return passwordHashByteArray.indices.all { passwordHashByteArray[it] == expectedHashByteArray[it] }
     }
 
     override fun hash(password: String, salt: String): String {
@@ -56,7 +58,6 @@ class PasswordUseCase @Inject constructor(): IPasswordUseCase {
     }
 
     fun convertToByteArray(string: String): ByteArray {
-
         return string.toByteArray(charset = charset("UTF-8"))
     }
 

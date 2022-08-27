@@ -1,12 +1,9 @@
 package dev.danielkeyes.coffer
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.danielkeyes.coffer.usecase.IPasswordUseCase
-import dev.danielkeyes.coffer.usecase.PasswordUseCase
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,11 +17,11 @@ class SetupViewModel @Inject constructor(
             // generate salt
             val salt = passwordUseCase.generateSalt()
             //store salt
-            passwordRepository.storePasswordSalt(salt)
+            passwordRepository.storePasswordSalt(salt = salt)
             // hash pin
-            val passwordHash = passwordUseCase.hash(pin, salt)
+            val passwordHash = passwordUseCase.hash(password = pin, salt = salt)
             // store hash
-            passwordRepository.storeHashedPassword(passwordHash)
+            passwordRepository.storeHashedPassword(hash = passwordHash)
         }
     }
 }
