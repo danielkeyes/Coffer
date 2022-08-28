@@ -1,5 +1,7 @@
 # Coffer
 
+![App Icon](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+
 ***Definition***: a strongbox or small chest for holding valuables
 
 Also an excuse to create a pin page app using some different technologies for practice 
