@@ -1,5 +1,6 @@
 package dev.danielkeyes.coffer.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -33,12 +34,20 @@ fun PinPage(pin: String?,
             onEntry: (Char) -> Unit,
             delete: () -> Unit,
             submit: () -> Unit,
-) {
+            loading: Boolean = false,
+            ) {
+
+    Log.e("dkeyes", "loading $loading")
     Column() {
         Box(modifier = Modifier.weight(1f))
         PinDisplay(pin = pin)
         Box(modifier = Modifier.weight(1f))
-        Keypad(onEntry = {char ->  onEntry(char)}, delete = delete, submit = submit)
+        Keypad(
+            onEntry = {char ->  onEntry(char)},
+            delete = delete,
+            submit = submit,
+            enabled = !loading
+        )
         Box(modifier = Modifier.weight(1f))
     }
 }
@@ -70,8 +79,10 @@ fun Keypad(
     onEntry: (Char) -> Unit,
     delete: () -> Unit,
     submit: () -> Unit,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
+    Log.e("dkeyes", "enabled = $enabled")
     Column(modifier = modifier
         .fillMaxWidth()
         .padding(16.dp)) {
@@ -82,31 +93,34 @@ fun Keypad(
         val rowHeight = 72.dp
 
         Row( modifier = Modifier.height(rowHeight)){
-            KeypadButton(int = 1, onClick = { onEntry('1') }, modifier = buttonModifier)
-            KeypadButton(int = 2, onClick = { onEntry('2') }, modifier = buttonModifier)
-            KeypadButton(int = 3, onClick = { onEntry('3') }, modifier = buttonModifier)
+            KeypadButton(int = 1, onClick = { onEntry('1') }, enabled = enabled, modifier =
+                    buttonModifier)
+            KeypadButton(int = 2, onClick = { onEntry('2') }, enabled = enabled, modifier = buttonModifier)
+            KeypadButton(int = 3, onClick = { onEntry('3') }, enabled = enabled, modifier = buttonModifier)
         }
         Row( modifier = Modifier.height(rowHeight)){
-            KeypadButton(int = 4, onClick = { onEntry('4') }, modifier = buttonModifier)
-            KeypadButton(int = 5, onClick = { onEntry('5') }, modifier = buttonModifier)
-            KeypadButton(int = 6, onClick = { onEntry('6') }, modifier = buttonModifier)
+            KeypadButton(int = 4, onClick = { onEntry('4') }, enabled = enabled, modifier = buttonModifier)
+            KeypadButton(int = 5, onClick = { onEntry('5') }, enabled = enabled, modifier = buttonModifier)
+            KeypadButton(int = 6, onClick = { onEntry('6') }, enabled = enabled, modifier = buttonModifier)
         }
         Row( modifier = Modifier.height(rowHeight)){
-            KeypadButton(int = 7, onClick = { onEntry('7') }, modifier = buttonModifier)
-            KeypadButton(int = 8, onClick = { onEntry('8')}, modifier = buttonModifier)
-            KeypadButton(int = 9, onClick = { onEntry('9') }, modifier = buttonModifier)
+            KeypadButton(int = 7, onClick = { onEntry('7') }, enabled = enabled, modifier = buttonModifier)
+            KeypadButton(int = 8, onClick = { onEntry('8')}, enabled = enabled, modifier = buttonModifier)
+            KeypadButton(int = 9, onClick = { onEntry('9') }, enabled = enabled, modifier = buttonModifier)
         }
         Row(modifier = Modifier.height(rowHeight)) {
             KeypadButton(
-                Icons.Outlined.ArrowBack,
+                imageVector = Icons.Outlined.ArrowBack,
                 description = "Backspace",
                 onClick = { delete() },
+                enabled = enabled,
                 modifier = buttonModifier)
-            KeypadButton(int = 0, onClick = {'0' }, modifier = buttonModifier)
+            KeypadButton(int = 0, onClick = {'0' }, enabled = enabled, modifier = buttonModifier)
             KeypadButton(
-                Icons.Outlined.Check,
+                imageVector = Icons.Outlined.Check,
                 description = "Submit",
                 onClick = { submit() },
+                enabled = enabled,
                 modifier = buttonModifier
             )
         }
@@ -114,11 +128,13 @@ fun Keypad(
 }
 
 @Composable
-fun KeypadButton(int: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
+private fun KeypadButton(
+    int: Int, onClick: () -> Unit, enabled: Boolean, modifier: Modifier = Modifier
+) {
+    KeypadButton(
+        onClick = { onClick() },
+        enabled = enabled,
+        modifier = modifier) {
         Text(
             text = int.toString(),
             textAlign = TextAlign.Center,
@@ -128,14 +144,38 @@ fun KeypadButton(int: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun KeypadButton(imageVector: ImageVector, description: String, onClick: () -> Unit, modifier:
-Modifier =
-    Modifier) {
-    Box(
-        modifier = modifier.clickable { onClick() },
-        contentAlignment = Alignment.Center
+private fun KeypadButton(
+    imageVector: ImageVector,
+    description: String,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    KeypadButton(
+        onClick = { onClick() },
+        enabled = enabled,
+        modifier = modifier,
     ) {
         Icon(imageVector = imageVector, contentDescription = description)
+    }
+}
+
+@Composable
+private fun KeypadButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable() () -> Unit
+) {
+    var keypadModifier = modifier
+    if (enabled) {
+        keypadModifier = keypadModifier.clickable { onClick() }
+    }
+
+    Box(
+        modifier = keypadModifier, contentAlignment = Alignment.Center
+    ) {
+        content()
     }
 }
 

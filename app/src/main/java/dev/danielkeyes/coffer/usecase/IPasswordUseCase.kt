@@ -15,6 +15,8 @@ import javax.inject.Inject
 // used https://gist.github.com/tuesd4y/e1584120484ac24be9f00f3968a4787d
 // this example but with conversion to Strings for easier usability and later storage to
 // preferences store
+const val DEBUG = true
+
 interface IPasswordUseCase {
     fun isHashValid(hash: String?): Boolean
     fun generateSalt(): String
@@ -24,13 +26,18 @@ interface IPasswordUseCase {
 
 class PasswordUseCase @Inject constructor(): IPasswordUseCase {
     override fun isHashValid(hash: String?): Boolean {
+        if(DEBUG) {
+            Log.e("dkeyes", "isHashValid: hash $hash")
+        }
         return hash != null && hash.isNotEmpty()
     }
 
     override fun generateSalt(): String {
         val salt = ByteArray(16)
         SecureRandom().nextBytes(salt)
-
+        if(DEBUG){
+            Log.e("dkeyes", "generateSalt: salt ${convertToString(salt)}")
+        }
         return convertToString(salt)
     }
 
@@ -38,6 +45,14 @@ class PasswordUseCase @Inject constructor(): IPasswordUseCase {
             Boolean {
         val passwordHashByteArray = convertToByteArray(string = hash(password = password, salt = salt))
         val expectedHashByteArray = convertToByteArray(string = expectedHash)
+
+        if(DEBUG){
+            Log.e("dkeyes", "isExpectedPassword: password $password")
+            Log.e("dkeyes", "isExpectedPassword: salt $salt")
+            Log.e("dkeyes", "isExpectedPassword: generatedHash ${convertToString(passwordHashByteArray)}")
+            Log.e("dkeyes", "isExpectedPassword: expectedHash $expectedHash")
+        }
+
         if (passwordHashByteArray.size != expectedHashByteArray.size) return false
         return passwordHashByteArray.indices.all { passwordHashByteArray[it] == expectedHashByteArray[it] }
     }
@@ -47,6 +62,12 @@ class PasswordUseCase @Inject constructor(): IPasswordUseCase {
         val spec = PBEKeySpec(password.toCharArray(), saltByteArray, 1000, 256)
         try {
             val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+            if(DEBUG){
+                Log.e("dkeyes", "hash: password $password")
+                Log.e("dkeyes", "hash: salt $salt")
+                Log.e("dkeyes", "hash: hashedPassword ${convertToString(skf.generateSecret(spec)
+                    .encoded)}")
+            }
             return convertToString(skf.generateSecret(spec).encoded)
         } catch (e: NoSuchAlgorithmException) {
             throw AssertionError("Error while hashing a password: " + e.message, e)

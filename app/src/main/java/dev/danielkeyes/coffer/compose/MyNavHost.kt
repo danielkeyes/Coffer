@@ -1,7 +1,7 @@
 package dev.danielkeyes.coffer.compose
 
+import android.util.Log
 import android.widget.Toast
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,11 +63,15 @@ fun MyNavHost(navController: NavHostController) {
             val pinViewModel = hiltViewModel<PinViewModel>(parentEntry)
 
             val pin by pinViewModel.pin.observeAsState()
+            val loading by pinViewModel.loading.observeAsState(false)
 
             val context = LocalContext.current
 
-            PinPage(pin = pin,
-                onEntry = { char -> pinViewModel.entry(char) },
+            PinPage(
+                pin = pin,
+                onEntry = { char ->
+                    Log.e("dkeyes", "onEntry called")
+                    pinViewModel.entry(char) },
                 delete = { pinViewModel.delete() },
                 submit = {
                     pinViewModel.submit(onSuccess = {
@@ -76,9 +80,17 @@ fun MyNavHost(navController: NavHostController) {
                             navController.navigate(ROUTE.CONTENT.toString())
                         }
                     }, onFailure = {
-                        Toast.makeText(context, "Incorrect Pin", Toast.LENGTH_LONG).show()
+                        var message = if (pin?.isNotEmpty() == true) {
+                            "Incorrect Pin"
+                        } else {
+                            "Please enter a pin"
+                        }
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        pinViewModel.clearPin()
                     })
-                })
+                },
+                loading = loading,
+            )
         }
 
         composable(ROUTE.CONTENT.toString()) {

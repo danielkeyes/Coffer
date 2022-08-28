@@ -1,6 +1,7 @@
 package dev.danielkeyes.coffer
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.SharedPreferencesMigration
@@ -63,7 +64,6 @@ interface IPasswordRepository {
     suspend fun storeHashedPassword(hash: String)
 
     suspend fun storePasswordSalt(salt: String)
-
 }
 
 @Singleton
